@@ -1,5 +1,5 @@
 ```
-🧪 LAB EXPERIMENT: Breadth-First Search (BFS)
+ LAB EXPERIMENT: Breadth-First Search (BFS)
 
 ```
 🔹 AIM:
@@ -8,7 +8,7 @@ To implement Breadth-First Search (BFS) traversal and find the BFS order of a gr
 
 ```
 
-🧩 REQUIREMENTS:
+ REQUIREMENTS:
 
 Programming Language: Python
 
