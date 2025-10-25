@@ -1,168 +1,47 @@
+# Ex.No: 1  Implementation of Breadth First Search 
+### DATE: 17/02/2024                                                                           
+### REGISTER NUMBER :  212222060215
+### AIM: 
+To write a python program to implement Breadth first Search. 
+### Algorithm:
+1. Start the program
+2. Create the graph by using adjacency list representation
+3. Define a function bfs and take the set “visited” is empty and “queue” is empty
+4. Search start with initial node and add the node to visited and queue.
+5. For each neighbor node, check node is not in visited then add node to visited and queue list.
+6.  Creating loop to print the visited node.
+7.   Call the bfs function by passing arguments visited, graph and starting node.
+8.   Stop the program.
+### Program:
 ```
- LAB EXPERIMENT: Breadth-First Search (BFS)
+graph={
+    '5':['3','7'],
+    '3':['2','4'],
+    '7':['8'],
+    '2':[],
+    '4':['8'],
+    '8':[]
+    }
+visited=[]
+queue=[]
 
+def bfs(visited,graph,node):
+    visited.append(node)
+    queue.append(node)
+    while queue: # Creating loop to visit each node
+        m = queue.pop(0)
+        print (m, end = " ")
+        for neighbour in graph[m]:
+            if neighbour not in visited:
+                visited.append(neighbour)
+                queue.append(neighbour)
+print("Following is the Breadth-First Search")
+bfs(visited, graph, '5')
 ```
-🔹 AIM:
+### Output:
 
-To implement Breadth-First Search (BFS) traversal and find the BFS order of a graph.
-
-```
-
- REQUIREMENTS:
-
-Programming Language: Python
-
-Logic Programming Tool: SWI-Prolog
-
-Planning Language: PDDL or PDDL Editor Online
-
-Execution Environment: Jupyter Notebook or Google Colab
-```
-🐍 1. BFS Implementation in Python
-
-✅ Code:
-from collections import deque
-
-```
-
-# Function to perform BFS
-def bfs(graph, start):
-    visited = set()
-    queue = deque([start])
-    bfs_order = []
-
-    while queue:
-        vertex = queue.popleft()
-        if vertex not in visited:
-            bfs_order.append(vertex)
-            visited.add(vertex)
-            # Add unvisited neighbors to queue
-            queue.extend([neighbor for neighbor in graph[vertex] if neighbor not in visited])
-    return bfs_order
-
-# Example Graph (Adjacency List)
-graph = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': [],
-    'E': ['F'],
-    'F': []
-}
-
-# Input starting node
-start_node = 'A'
-bfs_result = bfs(graph, start_node)
-
-print("BFS Traversal Order:", bfs_result)
-
-```
-
- Expected Output:
- 
-BFS Traversal Order: ['A', 'B', 'C', 'D', 'E', 'F']
-✅ Run this program in Jupyter Notebook or Google Colab.
-
-```
-
- 2. BFS Implementation in SWI-Prolog
-
-✅ Code (save as bfs.pl):
-% BFS Implementation in Prolog
-
-% Graph definition using edge facts
-edge(a, b).
-edge(a, c).
-edge(b, d).
-edge(b, e).
-edge(c, f).
-edge(e, f).
-
-% BFS traversal
-bfs(Start, Traversal) :-
-    bfs_queue([Start], [], Traversal).
-
-bfs_queue([], Visited, Traversal) :-
-    reverse(Visited, Traversal).
-
-bfs_queue([Node|RestQueue], Visited, Traversal) :-
-    member(Node, Visited), !,
-    bfs_queue(RestQueue, Visited, Traversal).
-
-bfs_queue([Node|RestQueue], Visited, Traversal) :-
-    findall(Child, edge(Node, Child), Children),
-    append(RestQueue, Children, NewQueue),
-    bfs_queue(NewQueue, [Node|Visited], Traversal).
-
-```
-
-✅ Query to Run in SWI-Prolog:
-
-?- bfs(a, Traversal).
-
-```
-
- Expected Output:
-
-Traversal = [a, b, c, d, e, f].
-
-```
-
- 3. BFS Representation in PDDL
-You can describe BFS as a planning problem (not execute BFS, but model it).
-
-✅ Domain File (bfs-domain.pddl):
-(define (domain bfs-search)
-  (:predicates
-    (connected ?x ?y)
-    (visited ?x)
-    (current ?x)
-  )
-
-  (:action move
-    :parameters (?x ?y)
-    :precondition (and (current ?x) (connected ?x ?y) (not (visited ?y)))
-    :effect (and (visited ?y) (current ?y) (not (current ?x)))
-  )
-)
-
-✅ Problem File (bfs-problem.pddl):
-(define (problem bfs-problem)
-  (:domain bfs-search)
-
-  (:objects a b c d e f)
-
-  (:init
-    (connected a b)
-    (connected a c)
-    (connected b d)
-    (connected b e)
-    (connected e f)
-    (connected c f)
-    (current a)
-    (visited a)
-  )
-
-  (:goal (visited f))
-)
+![image](https://github.com/HariHaranLK/AI_Lab_2023-24/assets/132996089/f466a893-7d1f-46db-a717-d3e72dc4a709)
 
 
-* You can run this using an online PDDL editor like:
-* https://editor.planning.domains/
-
-It will simulate BFS-like traversal by applying move actions.
-
-```
-
-4. Observation & Output
-
-Tool	Output (Traversal Order)	Execution Type
-Python	A → B → C → D → E → F	Procedural BFS
-SWI-Prolog	A → B → C → D → E → F	Logic-based BFS
-PDDL	A → B → C → D → E → F	Planning-based traversal
-
-```
-
-🧾 Result:
-
-Successfully implemented Breadth-First Search (BFS) traversal using Python, SWI-Prolog, and PDDL, and verified the BFS order of a sample graph.
+### Result:
+Thus the breadth first search order was found sucessfully.
