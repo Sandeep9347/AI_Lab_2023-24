@@ -1,15 +1,92 @@
-# Ex.No: 10 Learning – Use Supervised Learning  
-### DATE:                                                                            
-### REGISTER NUMBER : 
-### AIM: 
-To write a program to train the classifier for -----------------.
-###  Algorithm:
+# Ex.No: 13 Learning – Use Supervised Learning
+## DATE: 01/11/2025
+## REGISTER NUMBER : 212222060215
+## AIM:
+To write a program to train a classifier for phishing website detection using supervised learning.
 
-### Program:
+## Algorithm:
+1.Import Libraries: Load required libraries like pandas, sklearn, and gradio.
+
+2.Load Dataset: Load the phishing dataset from a CSV file containing features like HTTPS, IP address, suspicious words, etc.
+
+3.Preprocess Data: Separate the features and labels (X, y) from the dataset.
+
+4.Model Selection: Choose RandomForestClassifier as the supervised learning model.
+
+5.Train the Model: Fit the model on the training data (X, y).
+
+6.Feature Extraction Function: Create a function to extract features from user input (URL, HTTPS, etc.).
+
+7.Prediction Function: Predict if a given URL is phishing or legitimate based on user inputs.
+
+8.Create Frontend with Gradio: Build an interactive web UI using gradio.Blocks for user-friendly input and output.
+
+## Program:
+import gradio as gr
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+
+# Load dataset from CSV
+df = pd.read_csv("phishing_data.csv")
+X = df.drop("Label", axis=1)
+y = df["Label"]
+
+# Train the model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X, y)
+
+# Feature extraction from user input
+def extract_features(url, https, ip_address, has_at, suspicious_words, short_url):
+    return [
+        1 if https.lower() == "yes" else 0,
+        1 if ip_address.lower() == "yes" else 0,
+        1 if has_at.lower() == "yes" else 0,
+        len(url),
+        url.count('.'),
+        1 if suspicious_words.lower() == "yes" else 0,
+        1 if short_url.lower() == "yes" else 0
+    ]
+
+# Prediction logic
+def predict_url(url, https, ip, at, suspicious, shortener):
+    features = extract_features(url, https, ip, at, suspicious, shortener)
+    prediction = model.predict([features])[0]
+    return "🟥 Phishing (Not Legitimate)" if prediction == 1 else "🟩 Legitimate Website"
+
+# Gradio UI
+with gr.Blocks(css=".gradio-container {font-family: 'Segoe UI', sans-serif;}") as demo:
+    gr.Markdown("# 🛡️ PhishGuard: Advanced Phishing URL Detection")
+
+    with gr.Accordion("🔗 Step 1: Enter the Website URL", open=True):
+        url = gr.Textbox(label="Enter the full website URL")
+
+    with gr.Accordion("🔐 Step 2: Does it start with HTTPS?"):
+        https = gr.Radio(["Yes", "No"], label="Starts with HTTPS?")
+
+    with gr.Accordion("📟 Step 3: Does it contain an IP address?"):
+        ip = gr.Radio(["Yes", "No"], label="Contains IP Address?")
+
+    with gr.Accordion("📧 Step 4: Does it contain an '@' symbol?"):
+        at = gr.Radio(["Yes", "No"], label="Contains '@' Symbol?")
+
+    with gr.Accordion("🔍 Step 5: Are suspicious words present?"):
+        suspicious = gr.Radio(["Yes", "No"], label="Words like 'login', 'bank', 'verify'?")
+
+    with gr.Accordion("🧩 Step 6: Is it a shortened URL?"):
+        shortener = gr.Radio(["Yes", "No"], label="Shortened URL?")
+
+    with gr.Row():
+        submit = gr.Button("🔎 Check Website Safety")
+        output = gr.Textbox(label="Prediction", lines=2)
+
+    submit.click(fn=predict_url,
+                 inputs=[url, https, ip, at, suspicious, shortener],
+                 outputs=output)
+
+demo.launch()
+# Output:
+![image](https://github.com/user-attachments/assets/416eee4c-8faa-41fa-84f0-2afb4a059511)
 
 
-### Output:
-
-
-### Result:
-Thus the system was trained successfully and the prediction was carried out.
+# Result:
+Thus, the phishing website classifier was successfully trained using supervised learning and was able to make predictions based on user inputs.
