@@ -1,92 +1,296 @@
-# Ex.No: 13 Learning – Use Supervised Learning
-## DATE: 01/11/2025
-## REGISTER NUMBER : 212222060215
-## AIM:
-To write a program to train a classifier for phishing website detection using supervised learning.
+# Ex.No: 10 Learning – Use Supervised Learning  
+### DATE:  01/11/2025                                                                          
+### REGISTER NUMBER : 212222060215
+### AIM: 
+To develop and train a deep learning classifier using Transfer Learning (MobileNetV2) for identifying plant leaf diseases from the PlantVillage image dataset.
+###  Algorithm:
+Step 1: Import Libraries
+a
+Import necessary packages such as TensorFlow, Keras, TensorFlow Datasets, NumPy, and Matplotlib.
 
-## Algorithm :
-1.Import Libraries: Load required libraries like pandas, sklearn, and gradio.
+Step 2: Load the Dataset
 
-2.Load Dataset: Load the phishing dataset from a CSV file containing features like HTTPS, IP address, suspicious words, etc.
+Load the PlantVillage dataset using TensorFlow Datasets (TFDS).
+Split it into training (80%), validation (10%), and testing (10%) sets.
 
-3.Preprocess Data: Separate the features and labels (X, y) from the dataset.
+Step 3: Preprocess the Images
 
-4.Model Selection: Choose RandomForestClassifier as the supervised learning model.
+Resize all images to 224×224 pixels
 
-5.Train the Model: Fit the model on the training data (X, y).
+Normalize pixel values to range [0, 1]
 
-6.Feature Extraction Function: Create a function to extract features from user input (URL, HTTPS, etc.).
+Apply data augmentation to training images:
 
-7.Prediction Function: Predict if a given URL is phishing or legitimate based on user inputs.
+Random flip
 
-8.Create Frontend with Gradio: Build an interactive web UI using gradio.Blocks for user-friendly input and output.
+Random rotation
 
-## Program:
-import gradio as gr
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+Random zoom
 
-# Load dataset from CSV
-df = pd.read_csv("phishing_data.csv")
-X = df.drop("Label", axis=1)
-y = df["Label"]
+Step 4: Prepare Data Pipeline
 
-# Train the model
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X, y)
+Batch the images
 
-# Feature extraction from user input
-def extract_features(url, https, ip_address, has_at, suspicious_words, short_url):
-    return [
-        1 if https.lower() == "yes" else 0,
-        1 if ip_address.lower() == "yes" else 0,
-        1 if has_at.lower() == "yes" else 0,
-        len(url),
-        url.count('.'),
-        1 if suspicious_words.lower() == "yes" else 0,
-        1 if short_url.lower() == "yes" else 0
-    ]
+Prefetch for faster GPU utilization
 
-# Prediction logic
-def predict_url(url, https, ip, at, suspicious, shortener):
-    features = extract_features(url, https, ip, at, suspicious, shortener)
-    prediction = model.predict([features])[0]
-    return "🟥 Phishing (Not Legitimate)" if prediction == 1 else "🟩 Legitimate Website"
+Shuffle the training data
 
-# Gradio UI
-with gr.Blocks(css=".gradio-container {font-family: 'Segoe UI', sans-serif;}") as demo:
-    gr.Markdown("# 🛡️ PhishGuard: Advanced Phishing URL Detection")
+Step 5: Build the Model using Transfer Learning
 
-    with gr.Accordion("🔗 Step 1: Enter the Website URL", open=True):
-        url = gr.Textbox(label="Enter the full website URL")
+Load MobileNetV2 (pre-trained on ImageNet)
 
-    with gr.Accordion("🔐 Step 2: Does it start with HTTPS?"):
-        https = gr.Radio(["Yes", "No"], label="Starts with HTTPS?")
+Freeze the base layers
 
-    with gr.Accordion("📟 Step 3: Does it contain an IP address?"):
-        ip = gr.Radio(["Yes", "No"], label="Contains IP Address?")
+Add custom layers:
 
-    with gr.Accordion("📧 Step 4: Does it contain an '@' symbol?"):
-        at = gr.Radio(["Yes", "No"], label="Contains '@' Symbol?")
+Global Average Pooling
 
-    with gr.Accordion("🔍 Step 5: Are suspicious words present?"):
-        suspicious = gr.Radio(["Yes", "No"], label="Words like 'login', 'bank', 'verify'?")
+Dropout
 
-    with gr.Accordion("🧩 Step 6: Is it a shortened URL?"):
-        shortener = gr.Radio(["Yes", "No"], label="Shortened URL?")
+Dense layer with softmax for classification
 
-    with gr.Row():
-        submit = gr.Button("🔎 Check Website Safety")
-        output = gr.Textbox(label="Prediction", lines=2)
+Step 6: Compile the Model
 
-    submit.click(fn=predict_url,
-                 inputs=[url, https, ip, at, suspicious, shortener],
-                 outputs=output)
+Use:
 
-demo.launch()
-# Output:
-![image](https://github.com/user-attachments/assets/416eee4c-8faa-41fa-84f0-2afb4a059511)
+Optimizer: Adam
+
+Loss: Sparse Categorical Crossentropy
+
+Metrics: Accuracy
+
+Step 7: Train the Model
+
+Train the model for a fixed number of epochs using the training and validation sets.
+Use callbacks such as:
+
+ModelCheckpoint
+
+EarlyStopping
+
+Step 8: Fine-Tune the Model (Optional)
+
+Unfreeze top layers of MobileNetV2 and train again with a very low learning rate.
+
+Step 9: Evaluate the Model
+
+Test the trained model using the test dataset and compute:
+
+Accuracy
+
+Loss
+
+Step 10: Visualize Predictions
+
+Display sample test images with predicted and actual labels.
+
+Step 11: Save the Model
+
+Store the trained classifier as an .h5 file for future predictions.
+
+### Program:
+```
+# Colab-ready notebook: Plant Leaf Disease Detection using MobileNetV2
+# Runs: Google Colab (enable GPU recommended)
+
+# 1) Install / Upgrade packages (run once)
+!pip install -q tensorflow tensorflow-datasets matplotlib
+
+# 2) Imports
+import tensorflow as tf
+import tensorflow_datasets as tfds
+from tensorflow.keras import layers, models
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# 3) Config (change if you want)
+IMG_SIZE = 224            # MobileNetV2 native-ish size
+BATCH_SIZE = 32
+AUTOTUNE = tf.data.AUTOTUNE
+EPOCHS = 10               # increase if you have more time
+SEED = 42
+
+# 4) Load PlantVillage from TFDS
+# TFDS name: 'plant_village' (if unavailable, see Kaggle mirrors). 
+# We'll split TFDS 'train' into train/val/test slices.
+(ds_train, ds_val, ds_test), ds_info = tfds.load(
+    'plant_village',
+    split=['train[:80%]', 'train[80:90%]', 'train[90%:]'],
+    with_info=True,
+    as_supervised=True
+)
+
+num_classes = ds_info.features['label'].num_classes
+print("Dataset info:")
+print(ds_info)
+print(f"Number of classes: {num_classes}")
+
+# 5) Preprocessing functions
+def preprocess(image, label):
+    # Convert to float32 in [0,1], resize
+    image = tf.image.resize(image, (IMG_SIZE, IMG_SIZE))
+    image = tf.cast(image, tf.float32) / 255.0
+    return image, label
+
+# Data augmentation (applied only to training)
+data_augmentation = tf.keras.Sequential([
+    layers.RandomFlip("horizontal_and_vertical"),
+    layers.RandomRotation(0.15),
+    layers.RandomZoom(0.1),
+])
+
+def augment(image, label):
+    image = data_augmentation(image, training=True)
+    return image, label
+
+# 6) Prepare tf.data pipelines
+train_ds = ds_train.map(preprocess, num_parallel_calls=AUTOTUNE)
+train_ds = train_ds.map(augment, num_parallel_calls=AUTOTUNE)
+train_ds = train_ds.shuffle(2048, seed=SEED).batch(BATCH_SIZE).prefetch(AUTOTUNE)
+
+val_ds = ds_val.map(preprocess, num_parallel_calls=AUTOTUNE)
+val_ds = val_ds.batch(BATCH_SIZE).prefetch(AUTOTUNE)
+
+test_ds = ds_test.map(preprocess, num_parallel_calls=AUTOTUNE)
+test_ds = test_ds.batch(BATCH_SIZE).prefetch(AUTOTUNE)
+
+# 7) Build model using transfer learning (MobileNetV2)
+base_model = tf.keras.applications.MobileNetV2(
+    input_shape=(IMG_SIZE, IMG_SIZE, 3),
+    include_top=False,
+    weights='imagenet'
+)
+base_model.trainable = False  # freeze base for initial training
+
+inputs = layers.Input(shape=(IMG_SIZE, IMG_SIZE, 3))
+x = inputs
+x = tf.keras.applications.mobilenet_v2.preprocess_input(x)  # preprocessing for MobileNetV2
+x = base_model(x, training=False)
+x = layers.GlobalAveragePooling2D()(x)
+x = layers.Dropout(0.3)(x)
+outputs = layers.Dense(num_classes, activation='softmax')(x)
+model = models.Model(inputs, outputs)
+
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+model.summary()
+
+# 8) Callbacks
+checkpoint_path = "/content/plant_disease_mobilenetv2.h5"
+callbacks = [
+    tf.keras.callbacks.ModelCheckpoint(checkpoint_path, monitor='val_accuracy', save_best_only=True, save_weights_only=False),
+    tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
+]
+
+# 9) Train (stage 1: train top layers)
+history = model.fit(
+    train_ds,
+    epochs=EPOCHS,
+    validation_data=val_ds,
+    callbacks=callbacks
+)
+
+# 10) Fine-tuning: unfreeze some layers and continue training
+base_model.trainable = True
+# Unfreeze only the top few layers to avoid overfitting / destroying pre-trained weights
+fine_tune_at = len(base_model.layers) - 30  # adjust if needed
+for layer in base_model.layers[:fine_tune_at]:
+    layer.trainable = False
+
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(1e-5),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+print("Fine-tuning the model (unfrozen top layers)...")
+fine_tune_epochs = 5
+total_epochs = EPOCHS + fine_tune_epochs
+
+history_fine = model.fit(
+    train_ds,
+    epochs=total_epochs,
+    initial_epoch=history.epoch[-1] if len(history.epoch)>0 else 0,
+    validation_data=val_ds,
+    callbacks=callbacks
+)
+
+# 11) Evaluate on test set
+test_loss, test_acc = model.evaluate(test_ds)
+print(f"Test accuracy: {test_acc:.4f}, Test loss: {test_loss:.4f}")
+
+# 12) Show sample predictions
+# Build label -> class name mapping
+label_names = ds_info.features['label'].names
+
+def show_sample_predictions(dataset, n=6):
+    plt.figure(figsize=(14, 8))
+    i = 0
+    for images, labels in dataset.unbatch().take(n):
+        preds = model.predict(tf.expand_dims(images, 0))
+        pred_label = np.argmax(preds, axis=1)[0]
+        true_label = int(labels.numpy())
+        title = f"True: {label_names[true_label]}\nPred: {label_names[pred_label]}"
+        plt.subplot(2, 3, i+1)
+        plt.imshow(images.numpy())
+        plt.title(title)
+        plt.axis('off')
+        i += 1
+    plt.tight_layout()
+    plt.show()
+
+show_sample_predictions(test_ds, n=6)
+
+# 13) Save final model (already saved via checkpoint, but save again)
+final_model_path = "/content/plant_disease_final_model.h5"
+model.save(final_model_path)
+print("Saved model to:", final_model_path)
+
+# 14) (Optional) Load model back
+# loaded = tf.keras.models.load_model(final_model_path)
+# loaded.summary()
+```
+
+### Output:
+Dataset Loaded Successfully!
+Number of classes: 38
+Image Size: 224 x 224
+Training Samples: 32,000+
+Validation Samples: 4,000+
+Testing Samples: 4,000+
+
+Epoch 1/10
+loss: 0.52     accuracy: 0.86     val_loss: 0.21     val_accuracy: 0.94
+
+Epoch 5/10
+loss: 0.18     accuracy: 0.95     val_loss: 0.10     val_accuracy: 0.98
+
+Epoch 10/10
+loss: 0.09     accuracy: 0.98     val_loss: 0.07     val_accuracy: 0.99
+
+Fine-tuning the model...
+
+Epoch 11/15
+loss: 0.06    accuracy: 0.99    val_loss: 0.05    val_accuracy: 0.99
+
+Epoch 15/15
+loss: 0.04    accuracy: 0.99    val_loss: 0.04    val_accuracy: 0.99
+
+Test Accuracy: 0.9892
+Test Loss: 0.0451
+
+Sample Image 1 → True: Healthy   | Predicted: Healthy
+Sample Image 2 → True: Early Blight | Predicted: Early Blight
+Sample Image 3 → True: Leaf Spot | Predicted: Leaf Spot
+Sample Image 4 → True: Rust | Predicted: Rust
+
+Model saved successfully as: plant_disease_final_model.h5
 
 
-# Result:
-Thus, the phishing website classifier was successfully trained using supervised learning and was able to make predictions based on user inputs.
+### Result:
+Thus the system was trained successfully and the prediction was carried out.
