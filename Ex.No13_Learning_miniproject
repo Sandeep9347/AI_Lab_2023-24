@@ -4,7 +4,7 @@
 ## AIM:
 To write a program to train a classifier for phishing website detection using supervised learning.
 
-## Algorithm:
+## Algorithm :
 1.Import Libraries: Load required libraries like pandas, sklearn, and gradio.
 
 2.Load Dataset: Load the phishing dataset from a CSV file containing features like HTTPS, IP address, suspicious words, etc.
