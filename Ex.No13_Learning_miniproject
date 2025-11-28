@@ -9,7 +9,7 @@ a
 Import necessary packages such as TensorFlow, Keras, TensorFlow Datasets, NumPy, and Matplotlib.
 
 Step 2: Load the Dataset
-
+ 
 Load the PlantVillage dataset using TensorFlow Datasets (TFDS).
 Split it into training (80%), validation (10%), and testing (10%) sets.
 
