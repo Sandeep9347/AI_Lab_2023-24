@@ -1,32 +1,47 @@
-
-# Ex.No: 5   Logic Programming – Factorial of number   
-### DATE: 12/09/2025                                                                        
-### REGISTER NUMBER : 212222060214
+# Ex.No: 1  Implementation of Breadth First Search 
+### DATE: 17/02/2024                                                                           
+### REGISTER NUMBER :  212222060215
 ### AIM: 
-To  write  a logic program for finding the factorial of given number using SWI-PROLOG. 
+To write a python program to implement Breadth first Search. 
 ### Algorithm:
-1. STEP 1: Start the program
-2. STEP 2:  Write a rules for finding factorial of given program in SWI-PROLOG.
-3. a)factorial of 0 is 1 => written as factorial(0,1).
-4. b)factorial of number greater than 0 obtained by recursively calling the factorial function.
-5. STEP 3: Run the program  to find answer of  query.
-6. STEP 4: Stop the program.
-
+1. Start the program
+2. Create the graph by using adjacency list representation
+3. Define a function bfs and take the set “visited” is empty and “queue” is empty
+4. Search start with initial node and add the node to visited and queue.
+5. For each neighbor node, check node is not in visited then add node to visited and queue list.
+6.  Creating loop to print the visited node.
+7.   Call the bfs function by passing arguments visited, graph and starting node.
+8.   Stop the program.
 ### Program:
 ```
-factorial(0,1).
-factorial(A,B) :-  
-           A > 0, 
-           C is A-1,
-           factorial(C,D),
-           B is A*D.
+graph={
+    '5':['3','7'],
+    '3':['2','4'],
+    '7':['8'],
+    '2':[],
+    '4':['8'],
+    '8':[]
+    }
+visited=[]
+queue=[]
+
+def bfs(visited,graph,node):
+    visited.append(node)
+    queue.append(node)
+    while queue: # Creating loop to visit each node
+        m = queue.pop(0)
+        print (m, end = " ")
+        for neighbour in graph[m]:
+            if neighbour not in visited:
+                visited.append(neighbour)
+                queue.append(neighbour)
+print("Following is the Breadth-First Search")
+bfs(visited, graph, '5')
 ```
-
 ### Output:
-<img width="473" alt="image" src="https://github.com/Vineesha29031970/AI_Lab_2023-24/assets/133136880/e7a5c046-d730-4253-96e5-8041b75d70c6">
 
-
+![image](https://github.com/HariHaranLK/AI_Lab_2023-24/assets/132996089/f466a893-7d1f-46db-a717-d3e72dc4a709)
 
 
 ### Result:
-Thus the factorial of given number was found by logic programming. 
+Thus the breadth first search order was found sucessfully.
